@@ -53,7 +53,8 @@ class LoadVesselData(Transform):
             # Load and process the image
             image = Image.open(sample['img']).convert('L')#.convert('RGB')
             image = image.resize((512, 512), resample=Image.Resampling.NEAREST)
-            image = np.array(image)
+            ###image = np.array(image)
+            image = np.array(image, dtype=np.float32) / 255.0  # Normalize & cast to float32
             image = torch.from_numpy(image).unsqueeze(0)  # Convert to tensor and add channel dim [1, H, W]
             ### to check if we need to convert to tensor and normalize
 
@@ -65,7 +66,7 @@ class LoadVesselData(Transform):
             mask = mask.resize((512, 512), resample=Image.Resampling.NEAREST)
             mask = np.array(mask, dtype=np.uint8)
             mask = np.where(mask == 255, 1, 0)  # Convert mask values to binary
-            mask = torch.from_numpy(mask).unsqueeze(0).float() / 255  # Convert to tensor and normalize
+            mask = torch.from_numpy(mask).unsqueeze(0).float() #/ 255  # Convert to tensor and normalize
 
             # Add metadata (if needed for further processing or consistency)
             return {
