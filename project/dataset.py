@@ -51,11 +51,14 @@ class LoadVesselData(Transform):
     def __call__(self, sample):
         try:
             # Load and process the image
-            image = Image.open(sample['img']).convert('RGB')
+            image = Image.open(sample['img']).convert('L')#.convert('RGB')
             image = image.resize((512, 512), resample=Image.Resampling.NEAREST)
             image = np.array(image)
-            if image.shape[-1] == 3:
-                image = torch.from_numpy(image.transpose(2, 0, 1)).float() / 255  # Convert to tensor and normalize
+            image = torch.from_numpy(image).unsqueeze(0)  # Convert to tensor and add channel dim [1, H, W]
+            ### to check if we need to convert to tensor and normalize
+
+            #if image.shape[-1] == 3:
+            #    image = torch.from_numpy(image.transpose(2, 0, 1)).float() / 255  # Convert to tensor and normalize
 
             # Load and process the mask
             mask = Image.open(sample['mask']).convert('L')
@@ -102,3 +105,28 @@ def visualize_vessel_sample(sample, title=None):
     if title is not None:
         plt.title(title)
     plt.show()
+    
+    
+def split_dataset(dataset, train_ratio=0.8, seed=42):
+    """
+    Splits the dataset into train and test datasets.
+
+    :param data_path: Path to the dataset folder.
+    :param train_ratio: Ratio of dataset to use for training. Default is 80% train, 20% test.
+    :param seed: Random seed for reproducibility.
+    :return: train_dataset, test_dataset
+    """
+    from torch.utils.data import Dataset, random_split
+
+    #dataset = DRIVEDataset(data_path)  
+
+    train_size = int(train_ratio * len(dataset))
+    test_size = len(dataset) - train_size
+
+    # Set random seed for reproducibility
+    torch.manual_seed(seed)
+    
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
+    print(f"Dataset split: {train_size} training samples, {test_size} testing samples.")
+    return train_dataset, test_dataset

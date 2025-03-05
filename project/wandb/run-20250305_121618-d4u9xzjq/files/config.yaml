@@ -1,0 +1,62 @@
+_wandb:
+    value:
+        cli_version: 0.19.7
+        m: []
+        mask/class_labels:
+            results_wandb_delimeter_ground truth:
+                key: results_wandb_delimeter_ground truth
+                type: mask/class_labels
+                value:
+                    "1": vessels
+            results_wandb_delimeter_predictions:
+                key: results_wandb_delimeter_predictions
+                type: mask/class_labels
+                value:
+                    "1": vessels
+        python_version: 3.10.12
+        t:
+            "1":
+                - 1
+                - 2
+                - 3
+                - 12
+                - 41
+                - 48
+                - 55
+            "2":
+                - 1
+                - 2
+                - 3
+                - 12
+                - 41
+                - 48
+                - 55
+            "3":
+                - 13
+                - 16
+                - 23
+                - 55
+            "4": 3.10.12
+            "5": 0.19.7
+            "8":
+                - 1
+                - 5
+            "12": 0.19.7
+            "13": linux-x86_64
+HausdorffDistance:
+    value: 0
+batch_size:
+    value: 5
+dice:
+    value: 0
+layers:
+    value: 5
+loss function:
+    value: DiceLoss()
+lr:
+    value: 0.001
+parameters:
+    value: 406804
+transform:
+    value:
+        - <dataset.LoadVesselData object at 0x7fcac8ba65c0>
