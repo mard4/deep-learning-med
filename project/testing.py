@@ -76,3 +76,47 @@ def compute_metric(dataloader, model, metric_fn, device):
         mean_value += metric_fn(output, sample["mask"])
     
     return (mean_value / len(dataloader)).item()
+
+
+def visual_evaluation_nomask(sample, model, device):
+    """
+    Visual inspection of a sample, showing:
+    - The grayscale X-ray image.
+    - The ground truth segmentation mask (in green).
+    - The network's predicted segmentation map (in red).
+    """
+    model.eval()
+    inferer = monai.inferers.SlidingWindowInferer(roi_size=[256, 256])
+    discrete_transform = monai.transforms.AsDiscrete(logit_thresh=0.5, threshold_values=True)
+    sigmoid = torch.nn.Sigmoid()
+
+    with torch.no_grad():
+        img_tensor = sample['img'].float().to(device)  # Ensure float32 and move to GPU
+        output = model(img_tensor)  # Get model output
+        output = sigmoid(output).cpu().squeeze().numpy()  # Apply sigmoid, move to CPU, and convert to NumPy
+        output = discrete_transform(output)  # Threshold the output
+
+    # Extract image and mask (ensure they are 2D)
+    img = sample["img"].squeeze().cpu().numpy()  # Convert image to NumPy, shape -> [512, 512]
+    #mask = sample['mask'].squeeze().cpu().numpy()  # Convert mask to NumPy, shape -> [512, 512]
+
+    # Prepare overlays (ensure they are 2D)
+    #overlay_mask = np.ma.masked_where(mask == 0, mask)  # Remove extra dimensions
+    overlay_output = np.ma.masked_where(output < 0.1, output)  # Ensure it's 2D
+
+    # Plot results
+    fig, ax = plt.subplots(1, 2, figsize=[15, 5])
+    
+    ax[0].imshow(img, cmap='gray')
+    ax[0].set_title('X-ray Image')
+
+    ax[1].imshow(img, cmap='gray')
+    ax[1].imshow(overlay_output, cmap='Reds', alpha=0.7)  # Red prediction overlay
+    ax[1].set_title('Model Prediction')
+
+    plt.show()
+    
+for sample in test_dataloader:
+    visual_evaluation(sample, model,device)
+    break
+    
