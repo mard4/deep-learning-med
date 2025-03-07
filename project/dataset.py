@@ -28,6 +28,7 @@ def build_dict_vessels(data_path, mode='training'):
     dicts = []
     # list all files in directory, including the path
     paths_retina = glob.glob(os.path.join(data_path, mode, 'images', '*.tif'))
+    #print(paths_retina)
     # make a corresponding list for all the mask files
     for retina_path in paths_retina:
         # find the binary mask that belongs to the original image, based on indexing in the filename
@@ -36,6 +37,8 @@ def build_dict_vessels(data_path, mode='training'):
         mask_path = os.path.join(data_path, mode, '1st_manual', f'{image_index}_manual1.gif')
         if os.path.exists(mask_path):
             dicts.append({'img': retina_path, 'mask': mask_path})
+        else:
+            dicts.append({'img': retina_path})
     return dicts
 
 
@@ -62,20 +65,32 @@ class LoadVesselData(Transform):
             #    image = torch.from_numpy(image.transpose(2, 0, 1)).float() / 255  # Convert to tensor and normalize
 
             # Load and process the mask
-            mask = Image.open(sample['mask']).convert('L')
-            mask = mask.resize((512, 512), resample=Image.Resampling.NEAREST)
-            mask = np.array(mask, dtype=np.uint8)
-            mask = np.where(mask == 255, 1, 0)  # Convert mask values to binary
-            mask = torch.from_numpy(mask).unsqueeze(0).float() #/ 255  # Convert to tensor and normalize
+            if 'mask' in sample.keys():
 
-            # Add metadata (if needed for further processing or consistency)
-            return {
-                'img': image,
-                'mask': mask,
-                'img_meta_dict': {'affine': np.eye(2)},
-                'mask_meta_dict': {'affine': np.eye(2)}
-            }
+                mask = Image.open(sample['mask']).convert('L')
+                mask = mask.resize((512, 512), resample=Image.Resampling.NEAREST)
+                mask = np.array(mask, dtype=np.uint8)
+                mask = np.where(mask == 255, 1, 0)  # Convert mask values to binary
+                mask = torch.from_numpy(mask).unsqueeze(0).float() #/ 255  # Convert to tensor and normalize
 
+                # Add metadata (if needed for further processing or consistency)
+                return {
+                    'img': image,
+                    'mask': mask,
+                    'img_meta_dict': {'affine': np.eye(2)},
+                    'mask_meta_dict': {'affine': np.eye(2)}
+                }
+
+            else:
+                return {
+                    'img': image,
+                    #'mask': mask,
+                    'img_meta_dict': {'affine': np.eye(2)},
+                    #'mask_meta_dict': {'affine': np.eye(2)}
+                }
+                
+                
+                
         except Exception as e:
             print(f"Error processing file: {e}")
             return None
