@@ -68,14 +68,18 @@ def compute_metric(dataloader, model, metric_fn, device):
     discrete_transform = monai.transforms.AsDiscrete(threshold=0.5)
     Sigmoid = torch.nn.Sigmoid()
     
-    mean_value = 0
+    mean_value = []
     
     for sample in dataloader:
         with torch.no_grad():
             output = discrete_transform(Sigmoid(inferer(sample['img'].to(device), network=model).cpu()))
-        mean_value += metric_fn(output, sample["mask"])
+            metric_value = metric_fn(output, sample["mask"]) # this returns a tensor
+            
+            mean_value.append(metric_value) # store tensors
     
-    return (mean_value / len(dataloader)).item()
+    mean_value = torch.cat(mean_value).mean().item()
+    
+    return mean_value
 
 
 def visual_evaluation_nomask(sample, model, device):
@@ -115,8 +119,24 @@ def visual_evaluation_nomask(sample, model, device):
     ax[1].set_title('Model Prediction')
 
     plt.show()
-    
-for sample in test_dataloader:
-    visual_evaluation(sample, model,device)
-    break
-    
+
+def compute_test_predictions(dataloader, model, device):
+    """
+    This function runs inference on a test set (no ground truth masks).
+    Returns a list of model predictions.
+    """
+    model.eval()
+    inferer = monai.inferers.SlidingWindowInferer(roi_size=[256, 256])
+    discrete_transform = monai.transforms.AsDiscrete(threshold=0.5)
+    Sigmoid = torch.nn.Sigmoid()
+
+    predictions = []  # Store model outputs
+
+    for sample in dataloader:
+        with torch.no_grad():
+            # Run inference on the image
+            output = discrete_transform(Sigmoid(inferer(sample['img'].to(device), network=model).cpu()))
+
+            predictions.append(output)  # Store output tensor
+
+    return predictions
