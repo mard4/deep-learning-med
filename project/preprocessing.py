@@ -10,7 +10,10 @@ import cv2
 def image_preprocessing(tiff_img_paths, type):
     clahe_img_paths = apply_clahe(tiff_img_paths, type)
     #gabor_img_paths = apply_gabor_filter(clahe_img_paths, type)
-    return clahe_img_paths
+    #halfwave_img_paths = apply_halwave_rectification (gabor_img_paths, type)
+    halfwave_img_paths = apply_halwave_rectification (clahe_img_paths, type)
+    #return clahe_img_paths
+    return halfwave_img_paths
 
 def apply_clahe(tiff_img_paths, type):
     # define CLAHE parameters as recommended by numerous papers
@@ -107,7 +110,7 @@ def apply_gabor_filter(clahe_img_paths, type):
     
     # Gabor filter parameters
     #wavelengths = [9, 10, 11]
-    wavelengths = [10]
+    wavelengths = [5]
     num_orientations = 24
     orientations = np.linspace(-np.pi, np.pi, num_orientations)  # 24 orientations from -π to π
     phase_offsets = np.linspace(-np.pi, np.pi, 5)  # phase offsets between -π and π
@@ -119,7 +122,7 @@ def apply_gabor_filter(clahe_img_paths, type):
     print('Saving computation in folder ' + output_dir)
     os.makedirs(output_dir, exist_ok=True)
     
-    # creating the list to save the paths to CLAHE images
+    # creating the list to save the paths to Gabor images
     path = []
     
     # setting offset for output name depending on the type of(train or test)
@@ -166,5 +169,42 @@ def apply_gabor_filter(clahe_img_paths, type):
         i = i + 1;
         
     print("Gabor filtering completed for all images.")
+    print(path)
+    return path
+
+def apply_halwave_rectification (gabor_img_paths, type):
+    # halfwave percentage set to 10
+    hwpercent = 10
+    
+    # creating the folder where the computation results are gonna be saved
+    output_dir = '../Halfwave_dataset/' + type;
+    print('Saving computation in folder ' + output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # creating the list to save the paths to Halfwave rectified images 
+    path = []
+    i = 1;
+    
+    # setting offset for output name depending on the type of(train or test)
+    if type == 'train':
+        offset = 20
+    else:
+        offset = 0
+    
+    for img_name in gabor_img_paths:
+        img = tiff.imread(img_name)
+        maxIntensity = np.max(img)
+        perVal = maxIntensity * hwpercent/100.0
+        img_rectified = np.where(img < perVal, 0, img)
+        
+        #save the processed image
+        halfwave_path = f'halfwave_{offset + i}.tif'
+        output_path = os.path.join(output_dir, halfwave_path)
+        path.append(output_path)
+        tiff.imwrite(output_path, img_rectified)
+        
+        print(f"Processed image : {offset + i} → Saved to {output_path}")
+        i = i + 1;
+    print("Halfwave rectification completed for all images.")
     print(path)
     return path
