@@ -1,1 +1,0 @@
-We use the PCAM validation set as training set. I.e., camelyonpatch_level_2_split_train_x and camelyonpatch_level_2_split_train_y were originally called camelyonpatch_level_2_split_valid_x and camelyonpatch_level_2_split_valid_y, respectively.
