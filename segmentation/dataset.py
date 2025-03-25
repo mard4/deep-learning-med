@@ -6,6 +6,7 @@ import monai
 from PIL import Image
 import torch
 from monai.transforms import Transform
+import tifffile as tiff
 
 
 def build_dict_vessels(data_path, mode='training'):
@@ -120,9 +121,8 @@ def visualize_vessel_sample(sample, title=None):
     
     if title is not None:
         plt.title(title)
-    plt.show()
-
-
+    plt.show() 
+    
 def split_dataset(dataset, train_ratio=0.8, seed=42):
     """
     Splits the dataset into train and test datasets.
