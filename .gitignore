@@ -22,6 +22,8 @@ logs/
 *.json
 *.h5
 *.db
+*.pt
+*.pth
 
 # Ignore system files
 .DS_Store
