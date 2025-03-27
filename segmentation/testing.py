@@ -81,7 +81,6 @@ def compute_metric(dataloader, model, metric_fn, device):
     
     return mean_value
 
-
 def visual_evaluation_nomask(sample, model, device):
     """
     Visual inspection of a sample, showing:
@@ -107,7 +106,7 @@ def visual_evaluation_nomask(sample, model, device):
     # Prepare overlays (ensure they are 2D)
     #overlay_mask = np.ma.masked_where(mask == 0, mask)  # Remove extra dimensions
     overlay_output = np.ma.masked_where(output < 0.1, output)  # Ensure it's 2D
-
+    
     # Plot results
     fig, ax = plt.subplots(1, 2, figsize=[15, 5])
     
@@ -120,12 +119,12 @@ def visual_evaluation_nomask(sample, model, device):
 
     plt.show()
 
-def compute_test_predictions(dataloader, model, device):
+#def compute_test_predictions(dataloader, model, device):
     """
     This function runs inference on a test set (no ground truth masks).
     Returns a list of model predictions.
     """
-    model.eval()
+'''    model.eval()
     inferer = monai.inferers.SlidingWindowInferer(roi_size=[256, 256])
     discrete_transform = monai.transforms.AsDiscrete(threshold=0.5)
     Sigmoid = torch.nn.Sigmoid()
@@ -139,4 +138,49 @@ def compute_test_predictions(dataloader, model, device):
 
             predictions.append(output)  # Store output tensor
 
-    return predictions
+    return predictions '''
+
+def compute_test_predictions_weighted(dataloader, model_dict, device):
+    """
+    Run ensemble inference using weighted voting based on Dice coefficients.
+    
+    Args:
+        dataloader: DataLoader for test samples
+        model_dict: Dictionary of {model: dice_score}
+        device: Torch device (e.g., "cuda" or "cpu")
+    
+    Returns:
+        List of predicted binary masks (one per sample)
+    """
+    inferer = monai.inferers.SlidingWindowInferer(roi_size=[256, 256])
+    discrete_transform = monai.transforms.AsDiscrete(threshold=0.5)
+    sigmoid = torch.nn.Sigmoid()
+
+    final_predictions = []
+
+    for sample in dataloader:
+        weighted_sum = None
+        total_weight = 0
+
+        with torch.no_grad():
+            for model, dice_score in model_dict.items():
+                model.eval()
+                output = inferer(sample["img"].to(device), network=model)
+                output = sigmoid(output).cpu()
+                output = discrete_transform(output)  # Apply threshold
+                output_np = output.squeeze(0).numpy()  # Convert to [H, W] or [D, H, W] if 3D
+
+                if weighted_sum is None:
+                    weighted_sum = dice_score * output_np
+                else:
+                    weighted_sum += dice_score * output_np
+                
+                total_weight += dice_score
+
+        # Normalize by total weight and apply threshold for binary mask
+        weighted_average = weighted_sum / total_weight
+        final_mask = (weighted_average >= 0.5).astype(np.uint8)
+
+        final_predictions.append(final_mask)
+
+    return final_predictions

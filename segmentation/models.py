@@ -1,14 +1,8 @@
-# for defining the various models we decided to test out
-import torch.nn as nn
-from monai.networks.blocks import Convolution
-from monai.networks.nets import UNet
 import torch
+import torch.nn as nn
 from monai.networks.blocks import UnetBasicBlock
 from monai.networks.layers import Conv
 
-#### =====================================================================
-###    """UNET Dropout"""
-#### =====================================================================
 class UNetWithDropout(nn.Module):
     def __init__(self, in_channels=1, out_channels=1, features=(16, 32, 64, 128, 256), dropout_prob=0.3):
         super().__init__()
@@ -17,7 +11,7 @@ class UNetWithDropout(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         self.dropout = nn.Dropout2d(p=dropout_prob)
 
-        # Encoder
+        # Encoder path
         prev_channels = in_channels
         for f in features:
             block = UnetBasicBlock(
@@ -35,21 +29,25 @@ class UNetWithDropout(nn.Module):
         self.bottleneck = UnetBasicBlock(
             spatial_dims=2,
             in_channels=features[-1],
-            out_channels=features[-1] * 2,
+            out_channels=features[-1]*2,
             kernel_size=3,
             stride=1,
             norm_name="BATCH"
         )
 
-        # Decoder
+        # Decoder path
+        # Decoder path
         self.upconvs = nn.ModuleList()
         self.decoder_blocks = nn.ModuleList()
+        reversed_features = list(reversed(features))
 
-        for f in reversed(features):
+        prev_channels = features[-1] * 2  # Now correctly reflects bottleneck output (512)
+
+        for f in reversed_features:
             self.upconvs.append(nn.ConvTranspose2d(prev_channels, f, kernel_size=2, stride=2))
             self.decoder_blocks.append(UnetBasicBlock(
                 spatial_dims=2,
-                in_channels=prev_channels,
+                in_channels=f * 2,  # Because of skip connection
                 out_channels=f,
                 kernel_size=3,
                 stride=1,
@@ -57,6 +55,7 @@ class UNetWithDropout(nn.Module):
             ))
             prev_channels = f
 
+        # Final convolution
         self.final_conv = Conv[Conv.CONV, 2](features[0], out_channels, kernel_size=1)
 
     def forward(self, x):
@@ -78,34 +77,3 @@ class UNetWithDropout(nn.Module):
             x = self.dropout(x)
 
         return self.final_conv(x)
-
-#### =====================================================================
-###   
-#### =====================================================================
-# Modified UNet without dropout
-modified_UNet = monai.networks.nets.UNet(
-    spatial_dims=2,
-    in_channels=1,
-    out_channels=1,
-    channels=(8, 16, 32, 64, 128, 256),
-    strides=(2, 2, 2, 2, 2),
-    num_res_units=3,
-    norm = 'BATCH',
-).to(device)
-
-#### =====================================================================
-###   
-dropout_UNet = UNetWithDropout(
-    in_channels=1,
-    out_channels=1,
-    features=(16, 32, 64, 128, 256),
-    dropout_prob=0.3).to(device)
-#### =====================================================================
-
-swin_model = monai.networks.nets.SwinUNETR(
-    img_size = (512, 512, 512),
-    in_channels = 1,
-    out_channels = 1,
-    feature_size = 48,
-    use_checkpoint = True
-).to(device)

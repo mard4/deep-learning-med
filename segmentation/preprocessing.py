@@ -11,9 +11,9 @@ def image_preprocessing(tiff_img_paths, type):
     clahe_img_paths = apply_clahe(tiff_img_paths, type)
     #gabor_img_paths = apply_gabor_filter(clahe_img_paths, type)
     #halfwave_img_paths = apply_halwave_rectification (gabor_img_paths, type)
-    halfwave_img_paths = apply_halwave_rectification (clahe_img_paths, type)
-    #return clahe_img_paths
-    return halfwave_img_paths
+    #halfwave_img_paths = apply_halwave_rectification (clahe_img_paths, type)
+    return clahe_img_paths
+    #return halfwave_img_paths
 
 def apply_clahe(tiff_img_paths, type):
     # define CLAHE parameters as recommended by numerous papers
@@ -67,7 +67,7 @@ def apply_clahe(tiff_img_paths, type):
     return path
 
 # helper functions for the Gabor filter's impelementation according to the pipeline
-
+'''
 # function to compute sigma
 def compute_sigma(wavelength, bandwidth):
     slratio = (1 / np.pi) * np.sqrt(np.log(2) / 2) * ((2**bandwidth + 1) / (2**bandwidth - 1))
@@ -208,3 +208,4 @@ def apply_halwave_rectification (gabor_img_paths, type):
     print("Halfwave rectification completed for all images.")
     print(path)
     return path
+'''

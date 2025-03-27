@@ -36,7 +36,7 @@ def log_to_wandb(epoch, train_loss,val_loss,accuracy, batch_data, outputs):
     wandb.log({'epoch': epoch, 'train_loss': train_loss, 'val_loss': val_loss, 'pixelaccuracy': accuracy, 'results': log_imgs})
 
 
-def train(model,epochs,train_dataloader, validation_loader, optimizer,loss_function,n, device):
+def train(model, epochs, train_dataloader, validation_loader, optimizer,loss_function,n, device):
     for epoch in tqdm(range(epochs)):
         # training
         model.train()    
