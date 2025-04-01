@@ -51,7 +51,7 @@ def apply_clahe(tiff_img_paths, type):
 
         # convert to uint8 (0-255 range) for saving
         clahe_img = (clahe_img * 255).astype(np.uint8)
-        print(f"Image {offset + i} is {img.shape}, {img.dtype}")
+        ##print(f"Image {offset + i} is {img.shape}, {img.dtype}")
         
         # save the processed image
         clahe_path = f'clahe_{offset + i}.tif'
@@ -59,7 +59,7 @@ def apply_clahe(tiff_img_paths, type):
         path.append(output_path)
         tiff.imwrite(output_path, clahe_img)
 
-        print(f"Processed image : {offset + i} → Saved to {output_path}")
+        ##print(f"Processed image : {offset + i} → Saved to {output_path}")
         i = i + 1;
 
     print("All images processed with customized CLAHE.")
