@@ -7,6 +7,45 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import convolve
 import cv2
 
+def apply_augmentation(train_dict_list, test_dict_list):
+    # extracting the list of paths to the tif images
+    print("Applying augmentations")
+    train_img_list = [d.get("img") for d in train_dict_list if "img" in d]
+    print('Sample from train_img_list')
+    print(train_img_list[0])
+    test_img_list = [d.get("img") for d in test_dict_list if "img" in d]
+    print('Sample from test_img_list')
+    print(test_img_list[0])
+
+    ### 
+    train_processed_list = image_preprocessing(train_img_list, 'train')
+
+    # temporary just for testing purposes
+    #first_two_img_list = train_img_list[:2]
+    #print(first_two_img_list)
+    #train_processed_list = image_preprocessing(first_two_img_list, 'train')
+
+    # substituiting the images in the dictionaries
+    for new_img, d in zip(train_processed_list, train_dict_list):
+        d["img"] = new_img
+    i = 1;   
+    # checking the computation    
+    for d in train_dict_list:
+        if i < 41:
+            i = i + 1
+        else:
+            #print(d)
+            break
+
+    # doing the same for test data
+    test_processed_list = image_preprocessing(test_img_list, 'test')
+
+    # substituiting the images in the dictionaries
+    for new_img, d in zip(test_processed_list, test_dict_list):
+        d["img"] = new_img
+    
+    return train_processed_list, test_processed_list
+
 def image_preprocessing(tiff_img_paths, type):
     clahe_img_paths = apply_clahe(tiff_img_paths, type)
     #gabor_img_paths = apply_gabor_filter(clahe_img_paths, type)
@@ -35,7 +74,7 @@ def apply_clahe(tiff_img_paths, type):
     
     # creating the folder where the computation results are gonna be saved
     output_dir = '../datasets/CLAHE_dataset/' + type;
-    print('Saving computation in folder ' + output_dir)
+    ##print('Saving computation in folder ' + output_dir)
     os.makedirs(output_dir, exist_ok=True)
     
     # computation

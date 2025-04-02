@@ -2,6 +2,33 @@ import torch
 import torch.nn as nn
 from monai.networks.blocks import UnetBasicBlock
 from monai.networks.layers import Conv
+import monai
+
+def build_model_by_name(name, params, device):
+    if name == "vanilla_UNet":
+        return monai.networks.nets.UNet(**params["vanilla_UNet"]).to(device)
+
+    elif name == "modified_UNet":
+        return monai.networks.nets.UNet(**params["modified_UNet"]).to(device)
+
+    elif name == "dropout_UNet":
+        return UNetWithDropout().to(device)
+
+    elif name == "swin_model":
+        return SwinUNETR(**params["swin_model"]).to(device)
+
+    else:
+        raise ValueError(f"Unknown model name: {name}")
+
+
+def build_ensemble_models(config, device):
+    models = []
+    for model_name in config["ensemble_models"]:
+        model = build_model_by_name(model_name, config["model_params"], device)
+        models.append(model)
+    return models
+
+
 
 class UNetWithDropout(nn.Module):
     def __init__(self, in_channels=1, out_channels=1, features=(16, 32, 64, 128, 256), dropout_prob=0.3):
