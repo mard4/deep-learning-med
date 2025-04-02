@@ -1,0 +1,61 @@
+### ==========================================================================
+## Dataset: DRIVE_dataset with only DRIVE images (0) | fat_DRIVE_dataset with also synth generated images (1)
+### ==========================================================================
+dataset_paths:
+  - ../datasets/fat_DRIVE_dataset/datasets/
+  - ../datasets/DRIVE_dataset/datasets/
+dataset_index: 1  # 0 for the first 1 for the second  
+
+batch_size: 16
+num_workers: 8
+device: auto 
+
+### ==========================================================================
+## Models for Ensemble:  ##[vanilla_UNet, modified_UNet, dropout_UNet, swin_model]
+### ==========================================================================
+ensemble_models: [dropout_UNet, modified_UNet]
+
+### ==========================================================================
+## Regularization
+### ==========================================================================
+n_epochs: 250
+early_stopping_patience: 40 # number of epochs to wait after valLoss improves
+early_stopping_delta: 0.002     ## Minimum change in validation loss to be considered an improvement. Prevents stopping due to very tiny improvements
+loss: DiceLoss    # DiceLoss
+optimizer: Adam   # Adam or AdamW
+learning_rate: 0.001
+split_ratio: 0.8
+
+# Export settings
+save_model: ../saved_models/
+save_path: ../saved_outputs/output_images
+zip_filename: ../saved_outputs/segmentation_outputs
+
+### ==========================================================================
+######## Model Parameters (be careful dont touch if you dont know what youre doing!!)
+### ==========================================================================
+model_params:
+  vanilla_UNet:
+    spatial_dims: 2
+    in_channels: 1
+    out_channels: 1
+    channels: [8, 16, 32, 64, 128]
+    strides: [2, 2, 2, 2]
+    num_res_units: 2
+
+  modified_UNet:
+    spatial_dims: 2
+    in_channels: 1
+    out_channels: 1
+    channels: [8, 16, 32, 64, 128, 256]
+    strides: [2, 2, 2, 2, 2]
+    num_res_units: 3
+    norm: BATCH
+
+  swin_model:
+    img_size: [512, 512]
+    in_channels: 1
+    out_channels: 1
+    feature_size: 48
+    use_checkpoint: true
+    spatial_dims: 2

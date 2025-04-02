@@ -184,3 +184,47 @@ def compute_test_predictions_weighted(dataloader, model_dict, device):
         final_predictions.append(final_mask)
 
     return final_predictions
+
+
+from monai.transforms import Transform
+class LoadTestData(Transform):
+    def __init__(self, keys=None):
+        super().__init__()
+        self.keys = keys
+        self.target_size = (512, 512)
+
+    def __call__(self, sample):
+        try:
+            image = Image.open(sample['img']).convert('L')
+            original_size = image.size[::-1]  # (H, W) ← PIL gives (W, H)
+
+            image = image.resize(self.target_size[::-1], resample=Image.Resampling.BILINEAR)
+            image = np.array(image, dtype=np.float32) / 255.0
+            image = torch.from_numpy(image).unsqueeze(0)
+
+            output = {
+                'img': image,
+                'img_meta_dict': {
+                    'original_size': original_size,
+                    'affine': np.eye(2)
+                }
+            }
+
+            if 'mask' in sample:
+                mask = Image.open(sample['mask']).convert('L')
+                mask = mask.resize(self.target_size[::-1], resample=Image.Resampling.NEAREST)
+                mask = np.array(mask, dtype=np.uint8)
+                mask = np.where(mask == 255, 1, 0)
+                mask = torch.from_numpy(mask).unsqueeze(0).float()
+
+                output['mask'] = mask
+                output['mask_meta_dict'] = {
+                    'original_size': original_size,
+                    'affine': np.eye(2)
+                }
+
+            return output
+
+        except Exception as e:
+            print(f"Error processing file: {e}")
+            return None
