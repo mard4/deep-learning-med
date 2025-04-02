@@ -31,3 +31,5 @@ Thumbs.db
 
 wandb/
 wandb.*
+saved_outputs/
+saved_models/
