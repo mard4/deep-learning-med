@@ -3,6 +3,8 @@ import torch.nn as nn
 from monai.networks.blocks import UnetBasicBlock
 from monai.networks.layers import Conv
 import monai
+from monai.networks.nets import SwinUNETR
+
 
 def build_model_by_name(name, params, device):
     if name == "vanilla_UNet":
@@ -15,7 +17,7 @@ def build_model_by_name(name, params, device):
         return UNetWithDropout().to(device)
 
     elif name == "swin_model":
-        return SwinUNETR(**params["swin_model"]).to(device)
+        return monai.networks.nets.SwinUNETR(**params["swin_model"]).to(device)
 
     else:
         raise ValueError(f"Unknown model name: {name}")
