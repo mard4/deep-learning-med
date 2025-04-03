@@ -26,3 +26,23 @@ class EarlyStopping:
         else:
             self.best_score = score
             self.counter = 0
+
+def create_loss():
+    if config["loss"] == "Dice":
+        return monai.losses.DiceLoss(sigmoid=True, batch=True)
+    elif config["loss"] == "DiceCEL":
+        return monai.losses.DiceCELoss(sigmoid=True, to_onehot_y=False, softmax=False)
+    elif config["loss"] == "Focal":
+        return monai.losses.FocalLoss()
+    elif config["loss"] == "BCE":
+        return torch.nn.BCEWithLogitsLoss()
+    elif config["loss"] == "CE":
+        return torch.nn.CrossEntropyLoss()
+    return None
+
+def create_optimizer(model):
+    if config["optimizer"] == "Adam":
+        return torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
+    elif config["optimizer"] == "AdamW":
+        return torch.optim.AdamW(model.parameters(), lr=config["learning_rate"])
+    return None

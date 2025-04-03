@@ -6,14 +6,14 @@ dataset_paths:
   - ../datasets/DRIVE_dataset/datasets/
 dataset_index: 1  # 0 for the first 1 for the second  
 
-batch_size: 2 # 16
+batch_size: 16 # 16
 num_workers: 8
 device: auto 
 
 ### ==========================================================================
-## Models for Ensemble:  ##[vanilla_UNet, modified_UNet, dropout_UNet, swin_model]
+## Models for Ensemble:  ##[swin_model, vanilla_UNet, modified_UNet, dropout_UNet]
 ### ==========================================================================
-ensemble_models: [swin_model]
+ensemble_models: [vanilla_UNet, modified_UNet, dropout_UNet]
 
 ### ==========================================================================
 ## Regularization
@@ -21,9 +21,14 @@ ensemble_models: [swin_model]
 n_epochs: 250
 early_stopping_patience: 40 # number of epochs to wait after valLoss improves
 early_stopping_delta: 0.002     ## Minimum change in validation loss to be considered an improvement. Prevents stopping due to very tiny improvements
-loss: DiceLoss    # DiceLoss
-optimizer: Adam   # Adam or AdamW
-learning_rate: 0.001
+
+###   Dice,DiceCEL, Focal, BCE, CE
+loss: Focal   
+
+# Adam or AdamW
+optimizer: AdamW   
+
+learning_rate: 0.0001
 split_ratio: 0.8
 
 # Export settings
