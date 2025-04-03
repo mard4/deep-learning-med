@@ -19,16 +19,16 @@ ensemble_models: [vanilla_UNet, modified_UNet, dropout_UNet]
 ## Regularization
 ### ==========================================================================
 n_epochs: 250
-early_stopping_patience: 40 # number of epochs to wait after valLoss improves
+early_stopping_patience: 20 # number of epochs to wait after valLoss improves
 early_stopping_delta: 0.002     ## Minimum change in validation loss to be considered an improvement. Prevents stopping due to very tiny improvements
 
 ###   Dice,DiceCEL, Focal, BCE, CE
-loss: Focal   
+loss: BCE   
 
 # Adam or AdamW
-optimizer: AdamW   
+optimizer: Adam   
 
-learning_rate: 0.0001
+learning_rate: 0.001
 split_ratio: 0.8
 
 # Export settings

@@ -1,3 +1,5 @@
+import torch
+
 class EarlyStopping:
     def __init__(self, patience=10, delta=0.0, verbose=True):
         """
@@ -27,7 +29,7 @@ class EarlyStopping:
             self.best_score = score
             self.counter = 0
 
-def create_loss():
+def create_loss(config):
     if config["loss"] == "Dice":
         return monai.losses.DiceLoss(sigmoid=True, batch=True)
     elif config["loss"] == "DiceCEL":
@@ -40,7 +42,7 @@ def create_loss():
         return torch.nn.CrossEntropyLoss()
     return None
 
-def create_optimizer(model):
+def create_optimizer(config, model):
     if config["optimizer"] == "Adam":
         return torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
     elif config["optimizer"] == "AdamW":
