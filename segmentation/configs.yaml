@@ -6,14 +6,14 @@ dataset_paths:
   - ../datasets/DRIVE_dataset/datasets/
 dataset_index: 1  # 0 for the first 1 for the second  
 
-batch_size: 4 # 16
+batch_size: 2 # 16
 num_workers: 8
 device: auto 
 
 ### ==========================================================================
 ## Models for Ensemble:  ##[vanilla_UNet, modified_UNet, dropout_UNet, swin_model]
 ### ==========================================================================
-ensemble_models: [dropout_UNet, modified_UNet]
+ensemble_models: [swin_model]
 
 ### ==========================================================================
 ## Regularization
@@ -59,3 +59,5 @@ model_params:
     feature_size: 48
     use_checkpoint: true
     spatial_dims: 2
+    use_checkpoint: False  # <-- TURN OFF checkpointing
+
