@@ -13,7 +13,7 @@ device: auto
 ### ==========================================================================
 ## Models for Ensemble:  ##[swin_model, vanilla_UNet, modified_UNet, dropout_UNet]
 ### ==========================================================================
-ensemble_models: [vanilla_UNet, modified_UNet, dropout_UNet]
+ensemble_models: [vanilla_UNet] #, modified_UNet, dropout_UNet]
 
 ### ==========================================================================
 ## Regularization

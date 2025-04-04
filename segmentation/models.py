@@ -18,7 +18,7 @@ def build_model_by_name(name, params, device):
 
     elif name == "swin_model":
         return monai.networks.nets.SwinUNETR(**params["swin_model"]).to(device)
-
+    
     else:
         raise ValueError(f"Unknown model name: {name}")
 
@@ -106,3 +106,9 @@ class UNetWithDropout(nn.Module):
             x = self.dropout(x)
 
         return self.final_conv(x)
+
+    
+    
+    
+    
+##### ===============================================
