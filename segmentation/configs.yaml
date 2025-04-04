@@ -4,7 +4,8 @@
 dataset_paths:
   - ../datasets/fat_DRIVE_dataset/datasets/
   - ../datasets/DRIVE_dataset/datasets/
-dataset_index: 1  # 0 for the first 1 for the second  
+  - ../datasets/secret_DRIVE/datasets/
+dataset_index: 2  # 0 for the first 1 for the second  
 
 batch_size: 16 # 16
 num_workers: 8
@@ -13,7 +14,7 @@ device: auto
 ### ==========================================================================
 ## Models for Ensemble:  ##[swin_model, vanilla_UNet, modified_UNet, dropout_UNet]
 ### ==========================================================================
-ensemble_models: [vanilla_UNet] #, modified_UNet, dropout_UNet]
+ensemble_models: [dropout_UNet]
 
 ### ==========================================================================
 ## Regularization
